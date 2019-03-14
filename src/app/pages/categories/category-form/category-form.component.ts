@@ -44,6 +44,15 @@ export class CategoryFormComponent implements OnInit, AfterContentChecked {
 
   }
 
+  submitForm() {
+    this.submittingForm = true;
+    if (this.currentAction === 'new') { // new
+      this.createCategory();
+    } else { // edit
+      this.updateCategory();
+    }
+  }
+
   // para ver qual a ação da tela
   private setCurrentAction() {
     // devolve um array contento toda a url
@@ -84,6 +93,50 @@ export class CategoryFormComponent implements OnInit, AfterContentChecked {
     } else {
       const categoryName = this.category.name || '';
       this.pageTitle = 'Editando Categoria: ' + categoryName;
+    }
+  }
+
+  private createCategory() {
+    // criando uma categoria nova e adicionando os dados da categoryForm
+    const category: Category = Object.assign(new Category(), this.categoryForm.value);
+    this.categoryService.create(category)
+      .subscribe(
+        // tslint:disable-next-line:no-shadowed-variable
+        category => this.actionsForSuccess(category),
+        error => this.actionsFormError(error)
+      );
+  }
+
+  private updateCategory() {
+    // criando uma categoria nova e adicionando os dados da categoryForm
+    const category: Category = Object.assign(new Category(), this.categoryForm.value);
+    this.categoryService.update(category)
+      .subscribe(
+        // tslint:disable-next-line:no-shadowed-variable
+        category => this.actionsForSuccess(category),
+        error => this.actionsFormError(error)
+     );
+
+  }
+
+  private actionsForSuccess(category: Category) {
+    toastr.success('Solicitação processada com sucesso');
+    // forçando o recarregamento
+    this.router.navigateByUrl('categories', {skipLocationChange: true}).then(
+      () => this.router.navigate(['categories', category.id, 'edit'])
+    );
+  }
+
+  private actionsFormError(error) {
+    toastr.error('Ocorreu um erro ao processar a sua solicitação!');
+    this.submittingForm = false;
+
+    if (error.status === 422) {
+      // retorna o erro do servidor
+      this.serverErrorMessages = JSON.parse(error._body).errors;
+    } else {
+      // geralmente falha na comunicação
+      this.serverErrorMessages = ['Falha na comunicação com o servidor. Por favor tente mais tarde'];
     }
   }
 
