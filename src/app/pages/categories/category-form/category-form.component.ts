@@ -7,7 +7,8 @@ import { CategoryService } from '../shared/category.service';
 
 import { switchMap } from 'rxjs/operators';
 
-import toastr from 'toastr';
+// import toastr from 'toastr';
+import * as toastr from 'toastr';
 
 
 @Component({
